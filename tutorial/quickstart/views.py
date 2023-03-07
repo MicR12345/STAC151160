@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import permissions
-from tutorial.quickstart.serializers import UserSerializer, GroupSerializer
+from rest_framework import generics
+from .serializers import UserSerializer, GroupSerializer,FilmSerializer
+from .models import Film
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -20,3 +22,14 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class ClientList(generics.ListCreateAPIView):
+    queryset = Film.objects.all()
+    serializer_class = FilmSerializer
+    name = 'film-list'
+    ordering_fields = ['nazwa']
+
+class ClientDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Film.objects.all()
+    serializer_class = FilmSerializer
+    name = 'film-detail'
