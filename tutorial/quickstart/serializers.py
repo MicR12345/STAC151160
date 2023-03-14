@@ -14,7 +14,22 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ['url', 'name']
 
+class ProducentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Producent
+        fields = ['id', 'nazwa']
+
+class GatunekSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gatunek
+        fields = ['id', 'nazwa']
+
+class PostacSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Postac
+        fields = ['id', 'nazwa','film']
+
 class FilmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Film
-        fields = ['id', 'nazwa', 'rok', 'opis']
+        fields = ['id', 'nazwa', 'rok', 'opis','producent','gatunki']

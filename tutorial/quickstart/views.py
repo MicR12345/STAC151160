@@ -2,8 +2,8 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import generics
-from .serializers import UserSerializer, GroupSerializer,FilmSerializer
-from .models import Film
+from .serializers import UserSerializer, GroupSerializer,FilmSerializer,ProducentSerializer,PostacSerializer,GatunekSerializer
+from .models import Film,Producent,Gatunek,Postac
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
@@ -26,16 +26,50 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class ClientList(generics.ListCreateAPIView):
+class FilmList(generics.ListCreateAPIView):
     queryset = Film.objects.all()
     serializer_class = FilmSerializer
     name = 'film-list'
     ordering_fields = ['nazwa']
 
-class ClientDetail(generics.RetrieveUpdateDestroyAPIView):
+class FilmDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Film.objects.all()
     serializer_class = FilmSerializer
     name = 'film-detail'
+
+class ProducentList(generics.ListCreateAPIView):
+    queryset = Producent.objects.all()
+    serializer_class = ProducentSerializer
+    name = 'producent-list'
+    ordering_fields = ['nazwa']
+
+class ProducentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Producent.objects.all()
+    serializer_class = ProducentSerializer
+    name = 'producent-detail'
+
+class GatunekList(generics.ListCreateAPIView):
+    queryset = Gatunek.objects.all()
+    serializer_class = GatunekSerializer
+    name = 'gatunek-list'
+    ordering_fields = ['nazwa']
+
+class GatunekDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Gatunek.objects.all()
+    serializer_class = GatunekSerializer
+    name = 'gatunek-detail'
+
+class PostacList(generics.ListCreateAPIView):
+    queryset = Postac.objects.all()
+    serializer_class = PostacSerializer
+    name = 'postac-list'
+    ordering_fields = ['nazwa']
+
+class PostacDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Postac.objects.all()
+    serializer_class = PostacSerializer
+    name = 'postac-detail'
+
 
 @csrf_exempt
 def film_list(request):
@@ -44,7 +78,7 @@ def film_list(request):
     """
     if request.method == 'GET':
         filmy = Film.objects.all()
-        serializer = Film(filmy, many=True)
+        serializer = FilmSerializer(filmy, many=True)
         return JsonResponse(serializer.data, safe=False)
 
 @csrf_exempt
@@ -59,4 +93,76 @@ def film_detail(request, pk):
 
     if request.method == 'GET':
         serializer = FilmSerializer(filmy)
+        return JsonResponse(serializer.data)
+
+@csrf_exempt
+def producent_list(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        producenci = Producent.objects.all()
+        serializer = ProducentSerializer(producenci, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+@csrf_exempt
+def producent_detail(request, pk):
+    """
+    Retrieve, update or delete a code snippet.
+    """
+    try:
+        producenci = Producent.objects.get(pk=pk)
+    except Producent.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = ProducentSerializer(producenci)
+        return JsonResponse(serializer.data)
+
+@csrf_exempt
+def gatunek_list(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        gatunki = Gatunek.objects.all()
+        serializer = GatunekSerializer(gatunki, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+@csrf_exempt
+def gatunek_detail(request, pk):
+    """
+    Retrieve, update or delete a code snippet.
+    """
+    try:
+        gatunki = Gatunek.objects.get(pk=pk)
+    except Gatunek.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = GatunekSerializer(gatunki)
+        return JsonResponse(serializer.data)
+
+@csrf_exempt
+def postac_list(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        postacie = Postac.objects.all()
+        serializer = PostacSerializer(postacie, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+@csrf_exempt
+def postac_detail(request, pk):
+    """
+    Retrieve, update or delete a code snippet.
+    """
+    try:
+        postacie = Postac.objects.get(pk=pk)
+    except Postac.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = PostacSerializer(postacie)
         return JsonResponse(serializer.data)
