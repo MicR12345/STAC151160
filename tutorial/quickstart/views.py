@@ -6,6 +6,8 @@ from .serializers import UserSerializer, GroupSerializer,FilmSerializer,Producen
 from .models import Film,Producent,Gatunek,Postac
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django_filters import FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.parsers import JSONParser
 
 
@@ -30,6 +32,8 @@ class FilmList(generics.ListCreateAPIView):
     queryset = Film.objects.all()
     serializer_class = FilmSerializer
     name = 'film-list'
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nazwa']
     ordering_fields = ['nazwa']
 
 class FilmDetail(generics.RetrieveUpdateDestroyAPIView):
