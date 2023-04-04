@@ -1,7 +1,12 @@
 from django.contrib.auth.models import User, Group
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import generics
+from rest_framework.decorators import api_view
+from rest_framework import permissions
+from .permissions import IsOwnerOrReadOnly
 from .serializers import UserSerializer, GroupSerializer,FilmSerializer,ProducentSerializer,PostacSerializer,GatunekSerializer
 from .models import Film,Producent,Gatunek,Postac
 from django.http import HttpResponse, JsonResponse
@@ -35,11 +40,15 @@ class FilmList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nazwa']
     ordering_fields = ['nazwa']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 class FilmDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Film.objects.all()
     serializer_class = FilmSerializer
     name = 'film-detail'
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 class ProducentList(generics.ListCreateAPIView):
     queryset = Producent.objects.all()
@@ -170,3 +179,23 @@ def postac_detail(request, pk):
     if request.method == 'GET':
         serializer = PostacSerializer(postacie)
         return JsonResponse(serializer.data)
+
+class FilmViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`,
+    `update` and `destroy` actions.
+    """
+    queryset = Film.objects.all()
+    serializer_class = FilmSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'users': reverse('user-list', request=request, format=format),
+        'filmy': reverse('film-list', request=request, format=format)
+    })

@@ -4,9 +4,10 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    filmy = filmy = serializers.HyperlinkedRelatedField(many=True, view_name='film-detail', read_only=True)
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'groups']
+        fields = ['url', 'username', 'email', 'groups','filmy']
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
@@ -30,6 +31,7 @@ class PostacSerializer(serializers.ModelSerializer):
         fields = ['id', 'nazwa','film']
 
 class FilmSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Film
-        fields = ['id', 'nazwa', 'rok', 'opis','producent','gatunki']
+        fields = ['id', 'nazwa', 'rok', 'opis','producent','gatunki','owner']
