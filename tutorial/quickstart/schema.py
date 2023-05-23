@@ -4,6 +4,7 @@ from graphene_django import DjangoObjectType
 from .models import *
 from graphene import relay
 from graphene_django.filter import DjangoFilterConnectionField
+from django.db.models import Count, Sum, Avg, Max, Min, Q
 
 
 class FilmType(DjangoObjectType):
@@ -11,7 +12,10 @@ class FilmType(DjangoObjectType):
         model = Film
         fields = ("id", "nazwa", "rok", "opis", "producent", "gatunki")
 
+
 class FilmNode(DjangoObjectType):
+    liczba_gatunkow = graphene.Int()
+    liczba_postaci = graphene.Int()
     class Meta:
         model = Film
         filter_fields = {
@@ -46,18 +50,18 @@ class FilmUpdateMutationRelay(relay.ClientIDMutation):
         producent = graphene.ID(default_value=None)
         gatunki = graphene.List(graphene.ID)
 
-        film = graphene.Field(FilmType)
+    film = graphene.Field(FilmType)
 
-        @classmethod
-        def mutate_and_get_payload(cls, root, info, nazwa, id, opis, rok, producent, gatunki):
-            film = Film.objects.get(pk=id)
-            film.opis = opis
-            film.rok = rok
-            film.producent = producent
-            film.gatunki.set(gatunki)
-            film.save()
+    @classmethod
+    def mutate_and_get_payload(cls, root, info,**input):
+        film = Film.objects.get(pk=id)
+        film.opis = input.opis
+        film.rok = input.rok
+        film.producent = input.producent
+        film.gatunki.set(input.gatunki)
+        film.save()
 
-            return FilmUpdateMutationRelay(film=film)
+        return FilmUpdateMutationRelay(film=film)
 
 
 
@@ -105,14 +109,14 @@ class Query(graphene.ObjectType):
     producent_wg_id = graphene.Field(ProducentType, id = graphene.String())
     postacie = graphene.List(PostacType, nazwa_zawiera = graphene.String(default_value=""))
     gatunki = graphene.List(GatunekType, nazwa_zawiera=graphene.String(default_value=""))
-
+    lista_gatunkow = graphene.List(graphene.Int)
+    lista_postaci = graphene.List(graphene.Int)
 
     @staticmethod
     def resolve_producent(root, info):
         # We can easily optimize query count in the resolve method
         producent = Producent.objects.all()
         return producent
-
 
     @staticmethod
     def resolve_producent_wg_id(root, info, id):
@@ -131,6 +135,23 @@ class Query(graphene.ObjectType):
         if nazwa_zawiera is not "":
             return Gatunek.objects.filter(film__nazwa__contains=nazwa_zawiera)
         return gatunek
+
+    @classmethod
+    def resolve_liczba_gatunkow(cls, root, info):
+        gatunki = Film.objects.annotate(l_gat=Count("gatunek__id"))
+        for g in gatunki:
+            if g.id == root.id:
+                return g.gat
+        return 0
+
+    @classmethod
+    def resolve_liczba_postaci(cls, root, info):
+        postacie = Film.objects.annotate(l_p=Count("postac__id"))
+        for p in postacie:
+            if p.id == root.id:
+                return p.gat
+        return 0
+
 
 
 class Mutation(graphene.ObjectType):
