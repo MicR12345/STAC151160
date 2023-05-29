@@ -18,6 +18,7 @@ from rest_framework import routers
 from quickstart import views
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
+
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)

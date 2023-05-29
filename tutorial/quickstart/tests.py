@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework.reverse import reverse
 from rest_framework import status
 from .views import *
+from rest_framework.authtoken.models import Token
 class FilmTests(APITestCase):
     def create_users(self):
         if len(User.objects.all()) == 0:
@@ -10,19 +11,24 @@ class FilmTests(APITestCase):
         if len(User.objects.all()) == 1:
             User.objects.create_user('test', 'test@test.test', 'test')
 
-    def post_film_without_login(self, nazwa,rok,opis,producent,gatunki):
+    def post_film_without_login(self, nazwa,rok,opis):
         url = reverse(FilmList.name)
-        data = {'nazwa': nazwa,'rok':rok,'opis':opis,'producent':producent,'gatunki':gatunki}
+        data = {'nazwa': nazwa,'rok':rok,'opis':opis}
         response = self.client.post(url, data, format='json')
         return response
 
-    def post_film(self, nazwa,rok,opis,producent):
-        client = APIClient()
-        client.force_login(User.objects.get_or_create(username='testuser')[0])
+    def post_film(self, nazwa,rok,opis):
+        self.client = APIClient()
+        self.admin_user = User.objects.create_superuser(
+            username="admin",
+            email='admin@example.com',
+            password='testpass123',
+        )
+        token = Token.objects.create(user=self.admin_user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         url = reverse(FilmList.name)
-        data = {'nazwa': nazwa,'rok':rok,'opis':opis,'producent':producent}
-        client.request()
-        response = client.post(url, data, format='json')
+        data = {'nazwa': nazwa,'rok':rok,'opis':opis}
+        response = self.client.post(url, data, format='json')
         return response
 
     def get_film_without_login(self):
@@ -35,17 +41,14 @@ class FilmTests(APITestCase):
         nazwa = 'test'
         rok = 32
         opis = 'a'
-        producent = 1
-        gatunki = 1
-        response_one = self.post_film_without_login(nazwa,rok,opis,producent,gatunki)
+        response_one = self.post_film_without_login(nazwa,rok,opis)
         assert response_one.status_code == status.HTTP_403_FORBIDDEN or status.HTTP_401_UNAUTHORIZED
 
     def test_post_movie(self):
         nazwa = 'test'
         rok = 32
         opis = 'a'
-        producent = 1
-        response_one = self.post_film(nazwa,rok,opis,producent)
+        response_one = self.post_film(nazwa,rok,opis)
         print(response_one.status_code)
         assert response_one.status_code == status.HTTP_201_CREATED
 

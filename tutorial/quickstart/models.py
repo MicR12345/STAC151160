@@ -15,7 +15,7 @@ class Film(models.Model):
     rok = models.IntegerField()
     opis = models.TextField()
     producent = models.ForeignKey(Producent, on_delete=models.CASCADE,null=True)
-    gatunki = models.ManyToManyField(Gatunek,null=True)
+    gatunki = models.ManyToManyField(Gatunek,blank=True)
     owner = models.ForeignKey('auth.User', related_name='filmy', on_delete=models.CASCADE,null=True)
     class Meta:
         ordering = ['nazwa']
