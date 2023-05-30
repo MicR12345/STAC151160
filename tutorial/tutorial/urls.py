@@ -18,7 +18,8 @@ from rest_framework import routers
 from quickstart import views
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
-
+from django.conf import settings
+from django.conf.urls.static import static
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
@@ -31,5 +32,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include('quickstart.urls')),
     path("graphql",csrf_exempt(GraphQLView.as_view(graphiql=True))),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-]
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('index/', views.index)
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

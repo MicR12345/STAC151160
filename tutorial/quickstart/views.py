@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.parsers import JSONParser
-
+from django.template import loader
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -199,3 +199,7 @@ def api_root(request, format=None):
         'users': reverse('user-list', request=request, format=format),
         'filmy': reverse('film-list', request=request, format=format)
     })
+from django.http import HttpResponse
+def index(request):
+   template = loader.get_template('index.html') # getting our template
+   return HttpResponse(template.render())       # rendering the template in HttpResponse
