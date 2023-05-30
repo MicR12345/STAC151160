@@ -109,8 +109,8 @@ class Query(graphene.ObjectType):
     producent_wg_id = graphene.Field(ProducentType, id = graphene.String())
     postacie = graphene.List(PostacType, nazwa_zawiera = graphene.String(default_value=""))
     gatunki = graphene.List(GatunekType, nazwa_zawiera=graphene.String(default_value=""))
-    lista_gatunkow = graphene.List(graphene.Int)
-    lista_postaci = graphene.List(graphene.Int)
+    liczba_gatunkow = graphene.List(graphene.Int)
+    liczba_postaci = graphene.List(graphene.Int)
 
     @staticmethod
     def resolve_producent(root, info):
@@ -138,19 +138,20 @@ class Query(graphene.ObjectType):
 
     @classmethod
     def resolve_liczba_gatunkow(cls, root, info):
-        gatunki = Film.objects.annotate(l_gat=Count("gatunek__id"))
-        for g in gatunki:
-            if g.id == root.id:
-                return g.gat
-        return 0
+        filmy = Film.objects.all()
+        cgatunki = []
+        for film in filmy:
+            cgatunki.append(film.gatunki.count())
+        return cgatunki
 
     @classmethod
     def resolve_liczba_postaci(cls, root, info):
-        postacie = Film.objects.annotate(l_p=Count("postac__id"))
-        for p in postacie:
-            if p.id == root.id:
-                return p.gat
-        return 0
+        filmy = Film.objects.all()
+        cpostacie = []
+        for film in filmy:
+            cpostacie.append(Postac.objects.filter(film__id=film.id).count())
+        return cpostacie
+        return postacie
 
 
 
